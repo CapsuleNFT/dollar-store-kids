@@ -1,0 +1,13 @@
+{
+  "printWidth": 120,
+  "overrides": [
+    {
+      "files": [
+        "*.sol"
+      ],
+      "options": {
+        "singleQuote": false
+      }
+    }
+  ]
+}

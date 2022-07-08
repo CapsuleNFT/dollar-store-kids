@@ -30,7 +30,6 @@ contract TheDollarStore is Governable, IERC721Receiver {
     /// @notice Mapping of addresses who have minted and received their Dollar.
     mapping(address => bool) public alreadyMinted;
 
-    address private constant ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint256 private constant ONE_DOLLAR = 1e6;
     string private baseURI;
 
@@ -102,12 +101,8 @@ contract TheDollarStore is Governable, IERC721Receiver {
 
     /// @notice onlyGovernor:: Sweep given token to governor address
     function sweep(address _token) external onlyGovernor {
-        if (_token == ETH) {
-            Address.sendValue(payable(governor), address(this).balance);
-        } else {
-            uint256 _amount = IERC20(_token).balanceOf(address(this));
-            IERC20(_token).safeTransfer(governor, _amount);
-        }
+        uint256 _amount = IERC20(_token).balanceOf(address(this));
+        IERC20(_token).safeTransfer(governor, _amount);
     }
 
     /// @notice onlyGovernor:: Toggle minting status of the Dollar Store
@@ -119,7 +114,7 @@ contract TheDollarStore is Governable, IERC721Receiver {
      * @notice onlyGovernor:: Transfer ownership of the Dollar Store Capsule collection
      * @param newOwner_ Address of new owner
      */
-    function transferOwnership(address newOwner_) external onlyGovernor {
+    function transferCollectionOwnership(address newOwner_) external onlyGovernor {
         ICapsule(capsuleCollection).transferOwnership(newOwner_);
     }
 

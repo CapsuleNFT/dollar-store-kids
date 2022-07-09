@@ -15,7 +15,11 @@ import "./interfaces/ICapsuleMinter.sol";
 contract TheDollarStore is Governable, IERC721Receiver {
     using SafeERC20 for IERC20;
 
+    string public constant provenanceHash = "";
+    /// @notice Input Token Info
     address public constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    uint256 private constant ONE_DOLLAR = 1e6;
+    /// @notice Required Capsule Contracts
     ICapsuleFactory public constant CAPSULE_FACTORY = ICapsuleFactory(0x4Ced59c19F1f3a9EeBD670f746B737ACf504d1eB);
     ICapsuleMinter public constant CAPSULE_MINTER = ICapsuleMinter(0xb8Cf4A28DA322598FDB78a1406a61B72d6F6b396);
     /// @notice Allowed Dollar Store mints per address
@@ -23,20 +27,20 @@ contract TheDollarStore is Governable, IERC721Receiver {
     /// @notice Max amount of Dollars to release
     uint16 public constant MAX_DOLLARS = 9999;
 
-    /// @notice Dollar storage collection
+    /// @notice Dollar Store storage collection
     address public capsuleCollection;
-    /// @notice Flag indicating whether Dollar Store mint is enabled.
+    /// @notice Flag indicating whether the Dollar Store mint is enabled.
     bool public isMintEnabled = false;
     /// @notice Mapping of addresses who have minted and received their Dollar.
     mapping(address => bool) public alreadyMinted;
 
-    uint256 private constant ONE_DOLLAR = 1e6;
     string private baseURI;
 
     event DollarMinted(address indexed user, uint256 indexed id);
     event DollarBurnt(address indexed user, uint256 indexed id);
 
-    constructor(string memory baseURI_) payable {
+    constructor(string memory provenanceHash_, string memory baseURI_) payable {
+        provenanceHash = provenanceHash_;
         baseURI = baseURI_;
         capsuleCollection = CAPSULE_FACTORY.createCapsuleCollection{value: msg.value}(
             "The Dollar Store",
@@ -48,7 +52,7 @@ contract TheDollarStore is Governable, IERC721Receiver {
         IERC20(USDC).safeApprove(address(CAPSULE_MINTER), MAX_DOLLARS * ONE_DOLLAR);
     }
 
-    /// @notice Mint Dollar to caller address
+    /// @notice Mint a Dollar to caller address
     function mint() external payable {
         require(isMintEnabled, "mint-is-not-enabled");
         address _caller = _msgSender();
@@ -56,10 +60,10 @@ contract TheDollarStore is Governable, IERC721Receiver {
 
         uint256 _counter = ICapsule(capsuleCollection).counter();
         require(_counter < MAX_DOLLARS, "max-supply-reached");
-        // One address allowed to mint only 1 Dollar, update state
+        // Each address is allowed to mint a max of 1 Dollar - update state
         alreadyMinted[_caller] = true;
 
-        // Mint Dollar
+        // Mint the Dollar
         CAPSULE_MINTER.mintSingleERC20Capsule{value: msg.value}(
             capsuleCollection,
             USDC,
@@ -71,7 +75,7 @@ contract TheDollarStore is Governable, IERC721Receiver {
     }
 
     /**
-     * @notice Burn Dollar and get 1 USDC back
+     * @notice Burn a Dollar and get 1 USDC back
      * @param id_ Dollar id to burn
      */
     function burn(uint256 id_) external {
@@ -80,12 +84,12 @@ contract TheDollarStore is Governable, IERC721Receiver {
         ICapsule(capsuleCollection).safeTransferFrom(_caller, address(this), id_);
         // Burn Dollar
         CAPSULE_MINTER.burnSingleERC20Capsule(capsuleCollection, id_);
-        // Transfer user 1 USDC
+        // Transfer user Dollar contents (1 USDC)
         IERC20(USDC).safeTransfer(_caller, ONE_DOLLAR);
         emit DollarBurnt(_caller, id_);
     }
 
-    /// @dev This function enable this contracts to receive ERC721 tokens
+    /// @dev This function enables this contract to receive ERC721 tokens
     function onERC721Received(
         address,
         address,
@@ -119,10 +123,10 @@ contract TheDollarStore is Governable, IERC721Receiver {
     }
 
     /**
-     * @notice onlyGovernor:: Transfer meta master of the Dollar Store Capsule collection
-     * @param metaMaster_ Address of new meta master
+     * @notice onlyGovernor:: Transfer metamaster of the Dollar Store Capsule collection
+     * @param metaMaster_ Address of new metamaster
      */
-    function updateMetaMaster(address metaMaster_) external onlyGovernor {
-        ICapsule(capsuleCollection).updateTokenURIOwner(metaMaster_);
+    function updateMetamaster(address metamaster_) external onlyGovernor {
+        ICapsule(capsuleCollection).updateTokenURIOwner(metamaster_);
     }
 }

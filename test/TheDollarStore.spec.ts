@@ -9,6 +9,7 @@ import { impersonateAccount, setBalance } from '@nomicfoundation/hardhat-network
 describe('Dollar Store tests', async function () {
   const capsuleFactoryAddress = '0x4Ced59c19F1f3a9EeBD670f746B737ACf504d1eB'
   const usdcAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+  const provenanceHash = ''
   const baseURI = 'http://localhost/'
   let dollarStore: TheDollarStore, capsuleFactory: ICapsuleFactory, capsuleMinter: ICapsuleMinter
   let capsule: ICapsule, usdc: IERC20
@@ -35,7 +36,7 @@ describe('Dollar Store tests', async function () {
     capsuleCollectionTax = await capsuleFactory.capsuleCollectionTax()
     // Note setting owner address here so that later we don't have to call connect for owner
     const factory = await ethers.getContractFactory('TheDollarStore', governor)
-    dollarStore = (await factory.deploy(baseURI, { value: capsuleCollectionTax })) as TheDollarStore
+    dollarStore = (await factory.deploy(provenanceHash, baseURI, { value: capsuleCollectionTax })) as TheDollarStore
 
     const collection = await dollarStore.capsuleCollection()
     expect(collection).to.properAddress
@@ -196,13 +197,13 @@ describe('Dollar Store tests', async function () {
 
   context('Update MetaMaster', function () {
     it('Should revert if non governor user call update meta master', async function () {
-      const tx = dollarStore.connect(user1).updateMetaMaster(user2.address)
+      const tx = dollarStore.connect(user1).updateMetamaster(user2.address)
       await expect(tx).to.revertedWith('not governor')
     })
 
     it('Should update meta master of Dollar collection', async function () {
       expect(await capsule.tokenURIOwner()).to.eq(dollarStore.address)
-      await dollarStore.updateMetaMaster(user1.address)
+      await dollarStore.updateMetamaster(user1.address)
       expect(await capsule.tokenURIOwner()).to.eq(user1.address)
     })
   })

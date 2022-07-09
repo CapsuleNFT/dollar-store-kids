@@ -15,11 +15,9 @@ import "./interfaces/ICapsuleMinter.sol";
 contract TheDollarStore is Governable, IERC721Receiver {
     using SafeERC20 for IERC20;
 
-    string public constant provenanceHash = "";
-    /// @notice Input Token Info
+    string public provenanceHash;
+    /// @notice Input token for the Dollar Store
     address public constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-    uint256 private constant ONE_DOLLAR = 1e6;
-    /// @notice Required Capsule Contracts
     ICapsuleFactory public constant CAPSULE_FACTORY = ICapsuleFactory(0x4Ced59c19F1f3a9EeBD670f746B737ACf504d1eB);
     ICapsuleMinter public constant CAPSULE_MINTER = ICapsuleMinter(0xb8Cf4A28DA322598FDB78a1406a61B72d6F6b396);
     /// @notice Allowed Dollar Store mints per address
@@ -34,6 +32,7 @@ contract TheDollarStore is Governable, IERC721Receiver {
     /// @notice Mapping of addresses who have minted and received their Dollar.
     mapping(address => bool) public alreadyMinted;
 
+    uint256 private constant ONE_DOLLAR = 1e6; // 1 USDC
     string private baseURI;
 
     event DollarMinted(address indexed user, uint256 indexed id);
@@ -124,7 +123,7 @@ contract TheDollarStore is Governable, IERC721Receiver {
 
     /**
      * @notice onlyGovernor:: Transfer metamaster of the Dollar Store Capsule collection
-     * @param metaMaster_ Address of new metamaster
+     * @param metamaster_ Address of new metamaster
      */
     function updateMetamaster(address metamaster_) external onlyGovernor {
         ICapsule(capsuleCollection).updateTokenURIOwner(metamaster_);

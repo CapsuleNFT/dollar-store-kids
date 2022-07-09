@@ -25,6 +25,8 @@ interface ICapsuleMinter is IGovernable {
         uint256[] ids;
     }
 
+    function capsuleMintTax() external view returns (uint256);
+
     function getMintWhitelist() external view returns (address[] memory);
 
     function getCapsuleOwner(address _capsule, uint256 _id) external view returns (address);

@@ -5,6 +5,8 @@ pragma solidity 0.8.15;
 import "./IGovernable.sol";
 
 interface ICapsuleFactory is IGovernable {
+    function capsuleCollectionTax() external view returns (uint256);
+
     function capsuleMinter() external view returns (address);
 
     function createCapsuleCollection(

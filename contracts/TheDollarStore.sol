@@ -63,13 +63,7 @@ contract TheDollarStore is Governable, IERC721Receiver {
         alreadyMinted[_caller] = true;
 
         // Mint the Dollar
-        CAPSULE_MINTER.mintSingleERC20Capsule{value: msg.value}(
-            capsuleCollection,
-            USDC,
-            ONE_DOLLAR,
-            string(abi.encodePacked(baseURI, Strings.toString(_counter))),
-            _caller
-        );
+        CAPSULE_MINTER.mintSingleERC20Capsule{value: msg.value}(capsuleCollection, USDC, ONE_DOLLAR, "", _caller);
         emit DollarMinted(_caller, _counter);
     }
 

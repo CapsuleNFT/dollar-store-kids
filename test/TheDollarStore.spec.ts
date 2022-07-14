@@ -120,6 +120,10 @@ describe('Dollar Store tests', async function () {
       expect(tx).to.emit(dollarStore, 'DollarMinted').withArgs(user1.address, 0)
     })
 
+    // FIXME :: All of the tests are using core contract which are deployed on mainnet
+    // But DollarStore solidity code is updated as per latest updated in core contracts
+    // which are not deployed. Hence this test is going to fail until we deploy core
+    // contracts or use latest core contract and deploy in fork for tests.
     it('Should verify capsule data after Dollar minting', async function () {
       // Given Dollar Store has USDC balance
       await getUSDC(dollarStore.address, maxUsdcAmount)

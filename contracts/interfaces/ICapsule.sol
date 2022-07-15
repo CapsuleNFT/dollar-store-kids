@@ -12,6 +12,8 @@ interface ICapsule is IERC721 {
     // Admin functions
     function lockCollectionCount(uint256 _nftCount) external;
 
+    function setBaseURI(string calldata baseURI_) external;
+
     function setTokenURI(uint256 _tokenId, string memory _newTokenURI) external;
 
     function transferOwnership(address _newOwner) external;

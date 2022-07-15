@@ -33,20 +33,19 @@ contract TheDollarStore is Governable, IERC721Receiver {
     mapping(address => bool) public alreadyMinted;
 
     uint256 private constant ONE_DOLLAR = 1e6; // 1 USDC
-    string private baseURI;
 
     event DollarMinted(address indexed user, uint256 indexed id);
     event DollarBurnt(address indexed user, uint256 indexed id);
 
     constructor(string memory provenanceHash_, string memory baseURI_) payable {
         provenanceHash = provenanceHash_;
-        baseURI = baseURI_;
         capsuleCollection = CAPSULE_FACTORY.createCapsuleCollection{value: msg.value}(
             "The Dollar Store",
-            "TDS",
+            "DOLLAR",
             address(this),
             true
         );
+        setBaseURI(baseURI_);
         ICapsule(capsuleCollection).lockCollectionCount(MAX_DOLLARS);
         IERC20(USDC).safeApprove(address(CAPSULE_MINTER), MAX_DOLLARS * ONE_DOLLAR);
     }
@@ -121,5 +120,13 @@ contract TheDollarStore is Governable, IERC721Receiver {
      */
     function updateMetamaster(address metamaster_) external onlyGovernor {
         ICapsule(capsuleCollection).updateTokenURIOwner(metamaster_);
+    }
+
+    /**
+     * @notice onlyGovernor:: Set the collection baseURI
+     * @param baseURI_ New baseURI string
+     */
+    function setBaseURI(string memory baseURI_) public onlyGovernor {
+        ICapsule(capsuleCollection).setBaseURI(baseURI_);
     }
 }

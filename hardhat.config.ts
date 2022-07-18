@@ -63,12 +63,34 @@ const config: HardhatUserConfig = {
   },
 
   solidity: {
-    version: '0.8.15',
-    settings: {
-      optimizer: {
-        enabled: false,
-        runs: 200,
+    compilers: [
+      {
+        version: '0.8.15',
+        settings: {
+          outputSelection: {
+            '*': {
+              '*': ['storageLayout'],
+            },
+          },
+        },
       },
+      {
+        version: '0.8.9',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+          outputSelection: {
+            '*': {
+              '*': ['storageLayout'],
+            },
+          },
+        },
+      },
+    ],
+    overrides: {
+      'contracts/test/imports.sol': { version: '0.8.9' },
     },
   },
 }

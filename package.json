@@ -31,6 +31,7 @@
     "@typescript-eslint/eslint-plugin": "^5.27.0",
     "@typescript-eslint/parser": "^5.27.0",
     "chai": "^4.3.6",
+    "capsule-contracts": "git+ssh://git@github.com:CapsuleNFT/capsule-contracts.git",
     "dotenv": "^16.0.1",
     "eslint": "^8.19.0",
     "eslint-config-standard": "^17.0.0",

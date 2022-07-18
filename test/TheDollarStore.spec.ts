@@ -1,18 +1,19 @@
 import { ethers } from 'hardhat'
 import { expect } from 'chai'
-import { ICapsule, ICapsuleFactory, ICapsuleMinter, IERC20, TheDollarStore } from '../typechain-types'
+import { CapsuleFactory, IERC20, TheDollarStore } from '../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 const BigNumber = ethers.BigNumber
 const { hexlify, solidityKeccak256, zeroPad, hexStripZeros } = ethers.utils
-import { impersonateAccount, setBalance } from '@nomicfoundation/hardhat-network-helpers'
+import { impersonateAccount, setBalance, setCode } from '@nomicfoundation/hardhat-network-helpers'
+import CapsuleFactoryArtifact from '../artifacts/capsule-contracts/contracts/CapsuleFactory.sol/CapsuleFactory.json'
 
 describe('Dollar Store tests', async function () {
   const capsuleFactoryAddress = '0x4Ced59c19F1f3a9EeBD670f746B737ACf504d1eB'
   const usdcAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
   const provenanceHash = ''
   const baseURI = 'http://localhost/'
-  let dollarStore: TheDollarStore, capsuleFactory: ICapsuleFactory, capsuleMinter: ICapsuleMinter
-  let capsule: ICapsule, usdc: IERC20
+  let dollarStore: TheDollarStore, capsuleFactory: CapsuleFactory, capsuleMinter
+  let capsule, usdc: IERC20
   let governor: SignerWithAddress, user1: SignerWithAddress, user2: SignerWithAddress
 
   let capsuleCollectionTax, mintTax, maxUsdcAmount
@@ -32,7 +33,9 @@ describe('Dollar Store tests', async function () {
   })
 
   beforeEach(async function () {
-    capsuleFactory = (await ethers.getContractAt('ICapsuleFactory', capsuleFactoryAddress)) as ICapsuleFactory
+    await setCode(capsuleFactoryAddress, CapsuleFactoryArtifact.deployedBytecode)
+
+    capsuleFactory = (await ethers.getContractAt('CapsuleFactory', capsuleFactoryAddress)) as CapsuleFactory
     capsuleCollectionTax = await capsuleFactory.capsuleCollectionTax()
     // Note setting owner address here so that later we don't have to call connect for owner
     const factory = await ethers.getContractFactory('TheDollarStore', governor)
@@ -40,12 +43,15 @@ describe('Dollar Store tests', async function () {
 
     const collection = await dollarStore.capsuleCollection()
     expect(collection).to.properAddress
-    capsule = (await ethers.getContractAt('ICapsule', collection)) as ICapsule
+    capsule = await ethers.getContractAt('contracts/interfaces/ICapsule.sol:ICapsule', collection)
 
-    capsuleMinter = (await ethers.getContractAt('ICapsuleMinter', await dollarStore.CAPSULE_MINTER())) as ICapsuleMinter
+    capsuleMinter = await ethers.getContractAt(
+      'contracts/interfaces/ICapsuleMinter.sol:ICapsuleMinter',
+      await dollarStore.CAPSULE_MINTER()
+    )
     mintTax = await capsuleMinter.capsuleMintTax()
     maxUsdcAmount = ethers.utils.parseUnits((await dollarStore.MAX_DOLLARS()).toString(), 6)
-    usdc = (await ethers.getContractAt('IERC20', usdcAddress)) as IERC20
+    usdc = (await ethers.getContractAt('@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20', usdcAddress)) as IERC20
   })
 
   context('Verify deployment', function () {
@@ -120,10 +126,6 @@ describe('Dollar Store tests', async function () {
       expect(tx).to.emit(dollarStore, 'DollarMinted').withArgs(user1.address, 0)
     })
 
-    // FIXME :: All of the tests are using core contract which are deployed on mainnet
-    // But DollarStore solidity code is updated as per latest updated in core contracts
-    // which are not deployed. Hence this test is going to fail until we deploy core
-    // contracts or use latest core contract and deploy in fork for tests.
     it('Should verify capsule data after Dollar minting', async function () {
       // Given Dollar Store has USDC balance
       await getUSDC(dollarStore.address, maxUsdcAmount)
@@ -212,6 +214,20 @@ describe('Dollar Store tests', async function () {
     })
   })
 
+  context('Update baseURI', function () {
+    it('Should revert if non governor user call setBaseURI', async function () {
+      const tx = dollarStore.connect(user1).setBaseURI('https://google.com')
+      await expect(tx).revertedWith('not governor')
+    })
+
+    it('Should update baseURI of Dollar collection', async function () {
+      const newBaseURI = 'https://www.google.com'
+      expect(await capsule.baseURI()).eq(baseURI)
+      await dollarStore.setBaseURI(newBaseURI)
+      expect(await capsule.baseURI()).eq(newBaseURI)
+    })
+  })
+
   context('Sweep tokens', function () {
     it('Should sweep DAI from Dollar Store', async function () {
       const daiAddress = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
@@ -222,7 +238,10 @@ describe('Dollar Store tests', async function () {
       // Impersonate DAI whale account
       await impersonateAccount(daiWhale)
       const whaleSigner = await ethers.getSigner(daiWhale)
-      const dai = (await ethers.getContractAt('IERC20', daiAddress)) as IERC20
+      const dai = (await ethers.getContractAt(
+        '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
+        daiAddress
+      )) as IERC20
 
       // Given someone send DAI to Dollar Store
       const daiAmount = ethers.utils.parseEther('1500')

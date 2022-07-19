@@ -215,16 +215,54 @@ describe('Dollar Store tests', async function () {
   })
 
   context('Update baseURI', function () {
-    it('Should revert if non governor user call setBaseURI', async function () {
-      const tx = dollarStore.connect(user1).setBaseURI('https://google.com')
+    it('Should revert if non governor user call updateBaseURI', async function () {
+      const tx = dollarStore.connect(user1).updateBaseURI('https://google.com')
       await expect(tx).revertedWith('not governor')
     })
 
     it('Should update baseURI of Dollar collection', async function () {
       const newBaseURI = 'https://www.google.com'
       expect(await capsule.baseURI()).eq(baseURI)
-      await dollarStore.setBaseURI(newBaseURI)
+      await dollarStore.updateBaseURI(newBaseURI)
       expect(await capsule.baseURI()).eq(newBaseURI)
+    })
+  })
+
+  context('Royalty', function () {
+    const ZERO_ADDRESS = ethers.constants.AddressZero
+    it('Should allow governor to update royalty config', async function () {
+      // Given royalty receiver and rate are not set
+      expect(await capsule.royaltyReceiver(), 'receiver should be zero').eq(ZERO_ADDRESS)
+      expect(await capsule.royaltyRate(), 'royalty rate should be zero').eq(0)
+      //When updating config. User2 as receiver and 2% rate
+      const tx = await dollarStore.connect(governor).updateRoyaltyConfig(user2.address, 200)
+      // Then verify receiver and rate are updated correctly and event is emitted
+      expect(tx).emit(capsule, 'RoyaltyConfigUpdated').withArgs(ZERO_ADDRESS, user2.address, 0, 200)
+      expect(await capsule.royaltyReceiver(), 'incorrect receiver').eq(user2.address)
+      expect(await capsule.royaltyRate(), 'royalty rate should be 200').eq(200)
+    })
+
+    it('Should revert if non governor calls update', async function () {
+      // When updating rate to > 100%
+      const tx = dollarStore.connect(user1).updateRoyaltyConfig(user2.address, 10001)
+      // Then revert
+      await expect(tx).revertedWith('not governor')
+    })
+
+    it('Should be able to get royalty info', async function () {
+      // Given royalty config is not set.
+      const royaltyInfo = await capsule.royaltyInfo(0, 0)
+      // Then expect a response for token id 0 to be (zero address and 0 amount)
+      expect(royaltyInfo.receiver, 'incorrect royalty receiver').to.eq(ZERO_ADDRESS)
+      expect(royaltyInfo.royaltyAmount, 'incorrect output royalty amount').to.eq(0)
+
+      // When updating the royaltyReceiver to user 2 and royaltyRate to 1%
+      await dollarStore.connect(governor).updateRoyaltyConfig(user2.address, 100)
+      // When getting royalty info for tokenId 0 and sale price 500
+      const royaltyInfo2 = await capsule.royaltyInfo(0, 500)
+      // Then expect a response for token id 0 to be (user2, 1)
+      expect(royaltyInfo2.receiver, 'incorrect royalty receiver').to.eq(user2.address)
+      expect(royaltyInfo2.royaltyAmount, 'incorrect output royalty amount').to.eq(5)
     })
   })
 

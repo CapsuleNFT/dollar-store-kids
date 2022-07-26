@@ -6,6 +6,7 @@ import 'solidity-coverage'
 import '@typechain/hardhat'
 import 'hardhat-gas-reporter'
 import 'hardhat-contract-sizer'
+import './tasks/generate-abi'
 import dotenv from 'dotenv'
 dotenv.config()
 

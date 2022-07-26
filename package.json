@@ -13,6 +13,7 @@
     "coverage": "hardhat coverage",
     "deploy": "hardhat deploy",
     "fork": "hardhat node --no-deploy",
+    "generate-abi": "hardhat generate-abi",
     "test": "hardhat test",
     "solhint": "solhint './contracts/**/*.sol'",
     "solhint:fix": "prettier --write 'contracts/**/*.sol'",

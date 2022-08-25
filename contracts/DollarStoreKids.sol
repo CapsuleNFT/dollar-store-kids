@@ -36,6 +36,7 @@ contract DollarStoreKids is Governable, IERC721Receiver {
 
     event DollarStoreKidsMinted(address indexed user, uint256 indexed id);
     event DollarStoreKidsBurnt(address indexed user, uint256 indexed id);
+    event MintToggled(bool mintStatus);
 
     constructor(string memory provenanceHash_, string memory baseURI_) payable {
         provenanceHash = provenanceHash_;
@@ -44,7 +45,8 @@ contract DollarStoreKids is Governable, IERC721Receiver {
         );
         updateBaseURI(baseURI_);
         capsuleCollection.lockCollectionCount(MAX_DSK);
-        IERC20(USDC).safeApprove(address(CAPSULE_MINTER), MAX_DSK * ONE_DOLLAR);
+        // Using approve as USDC is ERC20 compliant token
+        IERC20(USDC).approve(address(CAPSULE_MINTER), MAX_DSK * ONE_DOLLAR);
     }
 
     /// @notice Mint a DSK to caller address
@@ -58,7 +60,8 @@ contract DollarStoreKids is Governable, IERC721Receiver {
         // Each address is allowed to mint a max of 1 DSK - update state
         alreadyMinted[_caller] = true;
 
-        // Mint the DSK
+        // DSK collection will be using baseURL and do not need URI for individual NFTs.
+        // Hence passing empty token URI to mint function below.
         CAPSULE_MINTER.mintSingleERC20Capsule{value: msg.value}(
             address(capsuleCollection),
             USDC,
@@ -107,6 +110,7 @@ contract DollarStoreKids is Governable, IERC721Receiver {
     /// @notice onlyGovernor:: Toggle minting status of the Dollar Store Kids
     function toggleMint() external onlyGovernor {
         isMintEnabled = !isMintEnabled;
+        emit MintToggled(isMintEnabled);
     }
 
     /**

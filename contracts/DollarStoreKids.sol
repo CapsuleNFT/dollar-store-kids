@@ -36,6 +36,7 @@ contract DollarStoreKids is Governable, IERC721Receiver {
 
     event DollarStoreKidsMinted(address indexed user, uint256 indexed id);
     event DollarStoreKidsBurnt(address indexed user, uint256 indexed id);
+    event MintToggled(bool mintStatus);
 
     constructor(string memory provenanceHash_, string memory baseURI_) payable {
         provenanceHash = provenanceHash_;
@@ -108,6 +109,7 @@ contract DollarStoreKids is Governable, IERC721Receiver {
     /// @notice onlyGovernor:: Toggle minting status of the Dollar Store Kids
     function toggleMint() external onlyGovernor {
         isMintEnabled = !isMintEnabled;
+        emit MintToggled(isMintEnabled);
     }
 
     /**

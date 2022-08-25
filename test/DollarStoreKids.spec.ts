@@ -81,7 +81,8 @@ describe('Dollar Store Kids tests', async function () {
       // Given DSK is deployed
       expect(await dollarStoreKids.isMintEnabled(), 'mint should be disabled').to.false
       // When mint status is toggled
-      await dollarStoreKids.toggleMint()
+      const tx = dollarStoreKids.toggleMint()
+      await expect(tx).to.emit(dollarStoreKids, 'MintToggled').withArgs(true)
       // Then minting should be enabled
       expect(await dollarStoreKids.isMintEnabled(), 'mint should be enabled').to.true
       // When mint status is toggled again

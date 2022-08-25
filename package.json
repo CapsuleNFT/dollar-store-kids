@@ -1,7 +1,7 @@
 {
-  "name": "capsule-add-ons",
+  "name": "dollar-store-kids",
   "version": "1.0.0",
-  "description": "Capsule protocol add-ons smart contracts",
+  "description": "Dollar Store Kids smart contracts",
   "repository": {
     "type": "git"
   },

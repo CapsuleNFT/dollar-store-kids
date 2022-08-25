@@ -44,7 +44,8 @@ contract DollarStoreKids is Governable, IERC721Receiver {
         );
         updateBaseURI(baseURI_);
         capsuleCollection.lockCollectionCount(MAX_DSK);
-        IERC20(USDC).safeApprove(address(CAPSULE_MINTER), MAX_DSK * ONE_DOLLAR);
+        // Using approve as USDC is ERC20 compliant token
+        IERC20(USDC).approve(address(CAPSULE_MINTER), MAX_DSK * ONE_DOLLAR);
     }
 
     /// @notice Mint a DSK to caller address

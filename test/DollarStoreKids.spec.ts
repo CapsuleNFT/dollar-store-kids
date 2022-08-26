@@ -10,7 +10,6 @@ import CapsuleFactoryArtifact from '../artifacts/capsule-contracts/contracts/Cap
 describe('Dollar Store Kids tests', async function () {
   const capsuleFactoryAddress = '0x4Ced59c19F1f3a9EeBD670f746B737ACf504d1eB'
   const usdcAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
-  const provenanceHash = ''
   const baseURI = 'http://localhost/'
   let dollarStoreKids: DollarStoreKids, capsuleFactory: CapsuleFactory, capsuleMinter
   let capsule, usdc: IERC20
@@ -39,7 +38,7 @@ describe('Dollar Store Kids tests', async function () {
     capsuleCollectionTax = await capsuleFactory.capsuleCollectionTax()
     // Note setting owner address here so that later we don't have to call connect for owner
     const factory = await ethers.getContractFactory('DollarStoreKids', governor)
-    dollarStoreKids = (await factory.deploy(provenanceHash, baseURI, {
+    dollarStoreKids = (await factory.deploy(baseURI, {
       value: capsuleCollectionTax,
     })) as DollarStoreKids
 

@@ -15,7 +15,6 @@ import "./interfaces/ICapsuleMinter.sol";
 contract DollarStoreKids is Governable, IERC721Receiver {
     using SafeERC20 for IERC20;
 
-    string public provenanceHash;
     /// @notice Input token for the Dollar Store Kids
     address public constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     ICapsuleFactory public constant CAPSULE_FACTORY = ICapsuleFactory(0x4Ced59c19F1f3a9EeBD670f746B737ACf504d1eB);
@@ -23,7 +22,7 @@ contract DollarStoreKids is Governable, IERC721Receiver {
     /// @notice Allowed Dollar Store Kids mints per address
     uint8 public constant MINT_PER_ADDRESS = 1;
     /// @notice Max amount of Dollar Store Kids to release
-    uint16 public constant MAX_DSK = 9999;
+    uint16 public constant MAX_DSK = 3333;
 
     /// @notice Dollar Store Kids collection
     ICapsule public immutable capsuleCollection;
@@ -38,10 +37,9 @@ contract DollarStoreKids is Governable, IERC721Receiver {
     event DollarStoreKidsBurnt(address indexed user, uint256 indexed id);
     event MintToggled(bool mintStatus);
 
-    constructor(string memory provenanceHash_, string memory baseURI_) payable {
-        provenanceHash = provenanceHash_;
+    constructor(string memory baseURI_) payable {
         capsuleCollection = ICapsule(
-            CAPSULE_FACTORY.createCapsuleCollection{value: msg.value}("Dollar $tore Kids", "D$K", address(this), true)
+            CAPSULE_FACTORY.createCapsuleCollection{value: msg.value}("Dollar Store Kids", "D$K", address(this), true)
         );
         updateBaseURI(baseURI_);
         capsuleCollection.lockCollectionCount(MAX_DSK);

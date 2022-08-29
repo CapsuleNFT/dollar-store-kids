@@ -1,17 +1,16 @@
 import { ethers } from 'hardhat'
 import { expect } from 'chai'
-import { CapsuleFactory, IERC20, DollarStoreKids } from '../typechain-types'
+import { ICapsuleFactory, IERC20, DollarStoreKids } from '../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 const BigNumber = ethers.BigNumber
 const { hexlify, solidityKeccak256, zeroPad, hexStripZeros } = ethers.utils
-import { impersonateAccount, setBalance, setCode } from '@nomicfoundation/hardhat-network-helpers'
-import CapsuleFactoryArtifact from '../artifacts/capsule-contracts/contracts/CapsuleFactory.sol/CapsuleFactory.json'
+import { impersonateAccount, setBalance } from '@nomicfoundation/hardhat-network-helpers'
 
 describe('Dollar Store Kids tests', async function () {
   const capsuleFactoryAddress = '0x4Ced59c19F1f3a9EeBD670f746B737ACf504d1eB'
   const usdcAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
   const baseURI = 'http://localhost/'
-  let dollarStoreKids: DollarStoreKids, capsuleFactory: CapsuleFactory, capsuleMinter
+  let dollarStoreKids: DollarStoreKids, capsuleFactory: ICapsuleFactory, capsuleMinter
   let capsule, usdc: IERC20
   let governor: SignerWithAddress, user1: SignerWithAddress, user2: SignerWithAddress
 
@@ -32,31 +31,28 @@ describe('Dollar Store Kids tests', async function () {
   })
 
   beforeEach(async function () {
-    await setCode(capsuleFactoryAddress, CapsuleFactoryArtifact.deployedBytecode)
-
-    capsuleFactory = (await ethers.getContractAt('CapsuleFactory', capsuleFactoryAddress)) as CapsuleFactory
+    capsuleFactory = (await ethers.getContractAt('ICapsuleFactory', capsuleFactoryAddress)) as ICapsuleFactory
     capsuleCollectionTax = await capsuleFactory.capsuleCollectionTax()
     // Note setting owner address here so that later we don't have to call connect for owner
     const factory = await ethers.getContractFactory('DollarStoreKids', governor)
-    dollarStoreKids = (await factory.deploy(baseURI, {
+    const tx = await factory.deploy(baseURI, {
       value: capsuleCollectionTax,
-    })) as DollarStoreKids
+    })
+    console.log(await tx.deployTransaction.wait())
+    dollarStoreKids = tx as DollarStoreKids
 
     const collection = await dollarStoreKids.capsuleCollection()
     expect(collection).to.properAddress
-    capsule = await ethers.getContractAt('contracts/interfaces/ICapsule.sol:ICapsule', collection)
+    capsule = await ethers.getContractAt('ICapsule', collection)
 
-    capsuleMinter = await ethers.getContractAt(
-      'contracts/interfaces/ICapsuleMinter.sol:ICapsuleMinter',
-      await dollarStoreKids.CAPSULE_MINTER()
-    )
+    capsuleMinter = await ethers.getContractAt('ICapsuleMinter', await dollarStoreKids.CAPSULE_MINTER())
     mintTax = await capsuleMinter.capsuleMintTax()
     maxUsdcAmount = ethers.utils.parseUnits((await dollarStoreKids.MAX_DSK()).toString(), 6)
-    usdc = (await ethers.getContractAt('@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20', usdcAddress)) as IERC20
+    usdc = (await ethers.getContractAt('IERC20', usdcAddress)) as IERC20
   })
 
   context('Verify deployment', function () {
-    it('Should verify DSK deployed correctly', async function () {
+    it.only('Should verify DSK deployed correctly', async function () {
       // Given DSK is deployed and collection is created
       const maxDSK = await dollarStoreKids.MAX_DSK()
       const maxId = await capsule.maxId()

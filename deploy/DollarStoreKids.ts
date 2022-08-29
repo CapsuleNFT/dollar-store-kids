@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy(dollarStoreKids, {
     from: deployer,
     log: true,
-    args: [''], // TODO Add base url
+    args: ['ipfs://bafybeigdpqvfrvddgbteaugtcomffhauxcyba777iiifbwmffrqd73voeu/'],
     value: ethers.utils.parseEther('0.025'),
   })
 }

@@ -103,6 +103,10 @@ Used to update the `baseURI` of the collection.
 
 Used to update the royalty config for the base Capsule NFT contract.
 
+## Mainnet addresses
+- Dollar Store Kids: 0xE4c3c91De9Eb9b92CedeE9ddB1e4d3388318151c
+- Collection: 0xC67F5E3a5B697AE004Edd8F84925189a81c6DC4b
+
 ## Summary
 
 At any time, the final version of the code can be seen on Github here. This code has also been audited by Quantstamp, with results viewable here.

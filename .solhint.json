@@ -1,0 +1,24 @@
+{
+  "extends": [
+    "solhint:recommended"
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "compiler-version": "off",
+    "mark-callable-contracts": "off",
+    "not-rely-on-time": "off",
+    "func-visibility": [
+      "warn",
+      {
+        "ignoreConstructors": true
+      }
+    ]
+  },
+  "plugins": [
+    "prettier"
+  ]
+}

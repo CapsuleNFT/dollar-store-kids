@@ -1,14 +1,10 @@
 {
   "networks": {
-    "31337": {
+    "1": {
+      "address": "0xE4c3c91De9Eb9b92CedeE9ddB1e4d3388318151c",
       "abi": [
         {
           "inputs": [
-            {
-              "internalType": "string",
-              "name": "provenanceHash_",
-              "type": "string"
-            },
             {
               "internalType": "string",
               "name": "baseURI_",
@@ -67,6 +63,19 @@
             }
           ],
           "name": "Initialized",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "mintStatus",
+              "type": "bool"
+            }
+          ],
+          "name": "MintToggled",
           "type": "event"
         },
         {
@@ -270,19 +279,6 @@
             }
           ],
           "stateMutability": "pure",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "provenanceHash",
-          "outputs": [
-            {
-              "internalType": "string",
-              "name": "",
-              "type": "string"
-            }
-          ],
-          "stateMutability": "view",
           "type": "function"
         },
         {

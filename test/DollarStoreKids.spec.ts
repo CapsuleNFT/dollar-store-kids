@@ -35,11 +35,7 @@ describe('Dollar Store Kids tests', async function () {
     capsuleCollectionTax = await capsuleFactory.capsuleCollectionTax()
     // Note setting owner address here so that later we don't have to call connect for owner
     const factory = await ethers.getContractFactory('DollarStoreKids', governor)
-    const tx = await factory.deploy(baseURI, {
-      value: capsuleCollectionTax,
-    })
-    console.log(await tx.deployTransaction.wait())
-    dollarStoreKids = tx as DollarStoreKids
+    dollarStoreKids = (await factory.deploy(baseURI, { value: capsuleCollectionTax })) as DollarStoreKids
 
     const collection = await dollarStoreKids.capsuleCollection()
     expect(collection).to.properAddress
@@ -52,7 +48,7 @@ describe('Dollar Store Kids tests', async function () {
   })
 
   context('Verify deployment', function () {
-    it.only('Should verify DSK deployed correctly', async function () {
+    it('Should verify DSK deployed correctly', async function () {
       // Given DSK is deployed and collection is created
       const maxDSK = await dollarStoreKids.MAX_DSK()
       const maxId = await capsule.maxId()
@@ -274,10 +270,7 @@ describe('Dollar Store Kids tests', async function () {
       // Impersonate DAI whale account
       await impersonateAccount(daiWhale)
       const whaleSigner = await ethers.getSigner(daiWhale)
-      const dai = (await ethers.getContractAt(
-        '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
-        daiAddress
-      )) as IERC20
+      const dai = (await ethers.getContractAt('IERC20', daiAddress)) as IERC20
 
       // Given someone send DAI to DSK contract
       const daiAmount = ethers.utils.parseEther('1500')

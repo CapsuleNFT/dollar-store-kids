@@ -79,27 +79,27 @@ We then transfer the USDC back to the user.
 
 The Governor functions are admin functions used for varying purposes:
 
-- `function sweep(address _token)``
+- `function sweep(address _token)`
 
 Used to withdraw any tokens sent to the Dollar Store Kids contract.
 
-- `function toggleMint()``
+- `function toggleMint()`
 
 Used to either start the mint process for the collection, or pause it.
 
-- `function transferCollectionOwnership(address newOwner_)``
+- `function transferCollectionOwnership(address newOwner_)`
 
 Used to transfer the ownership of the underlying Capsule NFT Collection.
 
-- `function updateMetamaster(address metamaster_)``
+- `function updateMetamaster(address metamaster_)`
 
 Used to transfer `metamaster` ownership of the Capsule NFT Collection. For more information on `metamaster` privileges, view here.
 
-- `function updateBaseURI(string memory baseURI_)``
+- `function updateBaseURI(string memory baseURI_)`
 
 Used to update the `baseURI` of the collection.
 
-- `function updateRoyaltyConfig(address royaltyReceiver_, uint256 royaltyRate_)``
+- `function updateRoyaltyConfig(address royaltyReceiver_, uint256 royaltyRate_)`
 
 Used to update the royalty config for the base Capsule NFT contract.
 

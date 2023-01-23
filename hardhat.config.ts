@@ -26,6 +26,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     enabled: process.env.ENABLE_GAS_REPORTER === 'true',
     noColors: true,
+    outputFile: 'gas-report.txt',
   },
   networks: {
     hardhat: {

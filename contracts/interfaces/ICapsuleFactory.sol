@@ -16,6 +16,8 @@ interface ICapsuleFactory is IGovernable {
         bool _isCollectionPrivate
     ) external payable returns (address);
 
+    function collectionBurner(address _capsule) external view returns (address);
+
     function getAllCapsuleCollections() external view returns (address[] memory);
 
     function getCapsuleCollectionsOf(address _owner) external view returns (address[] memory);
@@ -24,9 +26,11 @@ interface ICapsuleFactory is IGovernable {
 
     function getWhitelist() external view returns (address[] memory);
 
+    function isBlacklisted(address _user) external view returns (bool);
+
     function isCapsule(address _capsule) external view returns (bool);
 
-    function isBlacklisted(address _user) external view returns (bool);
+    function isCollectionBurner(address _capsuleCollection, address _account) external view returns (bool);
 
     function isWhitelisted(address _user) external view returns (bool);
 
@@ -47,6 +51,8 @@ interface ICapsuleFactory is IGovernable {
     function flushTaxAmount() external;
 
     function setCapsuleMinter(address _newCapsuleMinter) external;
+
+    function updateCapsuleCollectionBurner(address _capsuleCollection, address _newBurner) external;
 
     function updateCapsuleCollectionOwner(address _previousOwner, address _newOwner) external;
 

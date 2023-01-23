@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config'
 import fs from 'fs'
 
-const contractNames = ['DollarStoreKids']
+const contractNames = ['DollarStoreKids', 'DollarStoreKidsV2']
 const abiDir = 'abi'
 
 function readFile(fileName) {

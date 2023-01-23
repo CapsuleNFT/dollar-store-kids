@@ -10,6 +10,8 @@ interface ICapsule is IERC721, IERC2981 {
 
     function burn(address owner, uint256 tokenId) external;
 
+    function setMetadataProvider(address _metadataAddress) external;
+
     // Read functions
     function baseURI() external view returns (string memory);
 
@@ -18,6 +20,8 @@ interface ICapsule is IERC721, IERC2981 {
     function exists(uint256 tokenId) external view returns (bool);
 
     function isCollectionMinter(address _account) external view returns (bool);
+
+    function isCollectionPrivate() external view returns (bool);
 
     function maxId() external view returns (uint256);
 

@@ -2,13 +2,9 @@ import { ethers } from 'hardhat'
 import { expect } from 'chai'
 import { ICapsuleFactory, IERC20, DollarStoreKids } from '../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-const BigNumber = ethers.BigNumber
-const { hexlify, solidityKeccak256, zeroPad, hexStripZeros } = ethers.utils
-import { impersonateAccount, setBalance } from '@nomicfoundation/hardhat-network-helpers'
+import { adjustERC20Balance, Address } from './utils'
 
 describe('Dollar Store Kids tests', async function () {
-  const capsuleFactoryAddress = '0x4Ced59c19F1f3a9EeBD670f746B737ACf504d1eB'
-  const usdcAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
   const baseURI = 'http://localhost/'
   let dollarStoreKids: DollarStoreKids, capsuleFactory: ICapsuleFactory, capsuleMinter
   let capsule, usdc: IERC20
@@ -16,22 +12,13 @@ describe('Dollar Store Kids tests', async function () {
 
   let capsuleCollectionTax, mintTax, maxUsdcAmount
 
-  async function getUSDC(dollarStore: string, usdcAmount: string | number) {
-    const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
-    const balanceSlot = 9
-    const index = hexStripZeros(hexlify(solidityKeccak256(['uint256', 'uint256'], [dollarStore, balanceSlot])))
-    const value = hexlify(zeroPad(BigNumber.from(usdcAmount).toHexString(), 32))
-    await ethers.provider.send('hardhat_setStorageAt', [USDC, index, value])
-    await ethers.provider.send('evm_mine', [])
-  }
-
   before(async function () {
     // eslint-disable-next-line @typescript-eslint/no-extra-semi
     ;[governor, user1, user2] = await ethers.getSigners()
   })
 
   beforeEach(async function () {
-    capsuleFactory = (await ethers.getContractAt('ICapsuleFactory', capsuleFactoryAddress)) as ICapsuleFactory
+    capsuleFactory = (await ethers.getContractAt('ICapsuleFactory', Address.CAPSULE_FACTORY)) as ICapsuleFactory
     capsuleCollectionTax = await capsuleFactory.capsuleCollectionTax()
     // Note setting owner address here so that later we don't have to call connect for owner
     const factory = await ethers.getContractFactory('DollarStoreKids', governor)
@@ -44,7 +31,7 @@ describe('Dollar Store Kids tests', async function () {
     capsuleMinter = await ethers.getContractAt('ICapsuleMinter', await dollarStoreKids.CAPSULE_MINTER())
     mintTax = await capsuleMinter.capsuleMintTax()
     maxUsdcAmount = ethers.utils.parseUnits((await dollarStoreKids.MAX_DSK()).toString(), 6)
-    usdc = (await ethers.getContractAt('IERC20', usdcAddress)) as IERC20
+    usdc = (await ethers.getContractAt('IERC20', Address.USDC)) as IERC20
   })
 
   context('Verify deployment', function () {
@@ -111,7 +98,7 @@ describe('Dollar Store Kids tests', async function () {
 
     it('Should mint DSK', async function () {
       // Given DSK has USDC balance
-      await getUSDC(dollarStoreKids.address, maxUsdcAmount)
+      await adjustERC20Balance(Address.USDC, dollarStoreKids.address, maxUsdcAmount)
       // Verify USDC balance
       expect(await usdc.balanceOf(dollarStoreKids.address), 'incorrect usdc balance').to.eq(maxUsdcAmount)
       // When minting DSK
@@ -122,7 +109,7 @@ describe('Dollar Store Kids tests', async function () {
 
     it('Should verify capsule data after DSK minting', async function () {
       // Given DSK has USDC balance
-      await getUSDC(dollarStoreKids.address, maxUsdcAmount)
+      await adjustERC20Balance(Address.USDC, dollarStoreKids.address, maxUsdcAmount)
       const id = (await capsule.counter()).toString()
       // When minting dollar
       await dollarStoreKids.connect(user1).mint({ value: mintTax })
@@ -131,13 +118,13 @@ describe('Dollar Store Kids tests', async function () {
       expect(await capsule.tokenURI(id), 'tokenURI is incorrect').to.eq(uri)
       const data = await capsuleMinter.singleERC20Capsule(capsule.address, id)
       // Then verify Minter has correct data for ERC20 Capsule
-      expect(data._token, 'token should be USDC').to.eq(usdcAddress)
+      expect(data._token, 'token should be USDC').to.eq(Address.USDC)
       expect(data._amount, 'amount in Capsule should be 1 USDC').to.eq('1000000')
     })
 
     it('Should revert when same address minting again', async function () {
       // Given DSK has USDC balance
-      await getUSDC(dollarStoreKids.address, maxUsdcAmount)
+      await adjustERC20Balance(Address.USDC, dollarStoreKids.address, maxUsdcAmount)
       // When minting DSK twice
       await dollarStoreKids.connect(user1).mint({ value: mintTax })
       const tx = dollarStoreKids.connect(user1).mint({ value: mintTax })
@@ -150,7 +137,7 @@ describe('Dollar Store Kids tests', async function () {
     let id
     beforeEach(async function () {
       await dollarStoreKids.toggleMint()
-      await getUSDC(dollarStoreKids.address, maxUsdcAmount)
+      await adjustERC20Balance(Address.USDC, dollarStoreKids.address, maxUsdcAmount)
       id = await capsule.counter()
       await dollarStoreKids.connect(user2).mint({ value: mintTax })
     })
@@ -262,36 +249,20 @@ describe('Dollar Store Kids tests', async function () {
 
   context('Sweep tokens', function () {
     it('Should sweep DAI from DSK', async function () {
-      const daiAddress = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
-      const daiWhale = '0x6c6bc977e13df9b0de53b251522280bb72383700'
-      // Add 10 ETH to whale account
-      await setBalance(daiWhale, ethers.utils.parseEther('10'))
-
-      // Impersonate DAI whale account
-      await impersonateAccount(daiWhale)
-      const whaleSigner = await ethers.getSigner(daiWhale)
-      const dai = (await ethers.getContractAt('IERC20', daiAddress)) as IERC20
+      const dai = (await ethers.getContractAt('IERC20', Address.DAI)) as IERC20
 
       // Given someone send DAI to DSK contract
       const daiAmount = ethers.utils.parseEther('1500')
-      await dai.connect(whaleSigner).transfer(dollarStoreKids.address, daiAmount)
+      await adjustERC20Balance(dai.address, dollarStoreKids.address, daiAmount)
 
       // Verify DSK has DAI
-      const daiBalance = await dai.balanceOf(dollarStoreKids.address)
-      expect(daiBalance, 'incorrect DAI balance').to.eq(daiAmount)
-      // Verify governor has no DAI
-      const daiBalanceOwner = await dai.balanceOf(governor.address)
-      expect(daiBalanceOwner, 'DAI balance should be zero').to.eq(0)
+      expect(await dai.balanceOf(dollarStoreKids.address), 'incorrect DAI balance').eq(daiAmount)
 
       // When governor sweep DAI
-      await dollarStoreKids.sweep(daiAddress)
+      const tx = dollarStoreKids.sweep(dai.address)
 
-      // Then verify DSK has no DAI
-      const daiBalance2 = await dai.balanceOf(dollarStoreKids.address)
-      expect(daiBalance2, 'DAI balance should be zero').to.eq(0)
-      // Then verify governor has new DAI balance
-      const daiBalanceOwner2 = await dai.balanceOf(governor.address)
-      expect(daiBalanceOwner2, 'incorrect DAI balance').to.eq(daiAmount)
+      // Then verify DAI balance change
+      await expect(tx).to.changeTokenBalances(dai, [dollarStoreKids, governor], [daiAmount.mul(-1), daiAmount])
     })
   })
 })

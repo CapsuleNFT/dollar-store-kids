@@ -1,10 +1,6 @@
 import { HardhatUserConfig } from 'hardhat/types'
-import '@nomiclabs/hardhat-waffle'
-import '@nomiclabs/hardhat-ethers'
+import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-deploy'
-import 'solidity-coverage'
-import '@typechain/hardhat'
-import 'hardhat-gas-reporter'
 import 'hardhat-contract-sizer'
 import './tasks/generate-abi'
 import dotenv from 'dotenv'
@@ -30,6 +26,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     enabled: process.env.ENABLE_GAS_REPORTER === 'true',
     noColors: true,
+    outputFile: 'gas-report.txt',
   },
   networks: {
     hardhat: {

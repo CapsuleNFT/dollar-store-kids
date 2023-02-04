@@ -12,8 +12,10 @@
     "build": "npm run clean && npm run compile",
     "coverage": "hardhat coverage",
     "deploy": "hardhat deploy",
+    "deploy:dsk":"hardhat deploy --tags 'DollarStoreKidsV2'",
     "fork": "hardhat node --no-deploy",
     "generate-abi": "hardhat generate-abi",
+    "postinstall": "hardhat typechain && patch-package",
     "test": "hardhat test",
     "solhint": "solhint './contracts/**/*.sol'",
     "solhint:fix": "prettier --write 'contracts/**/*.sol'",
@@ -21,7 +23,7 @@
     "eslint:fix": "eslint --fix ./test --ext .ts"
   },
   "devDependencies": {
-    "@ethersproject/hardware-wallets": "^5.7.0",
+    "@anders-t/ethers-ledger": "^1.0.4",
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
     "@openzeppelin/contracts": "4.7.0",
     "@types/mocha": "^10.0.1",
@@ -43,6 +45,7 @@
     "husky": "^8.0.3",
     "lint-staged": "^13.1.0",
     "mocha": "^10.2.0",
+    "patch-package": "^6.5.1",
     "prettier": "^2.8.3",
     "prettier-plugin-solidity": "1.1.1",
     "solc": "0.8.15",

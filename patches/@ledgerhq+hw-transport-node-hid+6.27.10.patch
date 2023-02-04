@@ -1,0 +1,35 @@
+diff --git a/node_modules/@ledgerhq/hw-transport-node-hid/lib/TransportNodeHid.js b/node_modules/@ledgerhq/hw-transport-node-hid/lib/TransportNodeHid.js
+index d1012d6..a3ba6bd 100644
+--- a/node_modules/@ledgerhq/hw-transport-node-hid/lib/TransportNodeHid.js
++++ b/node_modules/@ledgerhq/hw-transport-node-hid/lib/TransportNodeHid.js
+@@ -66,6 +66,7 @@ var listenDevicesPollingSkip = function () { return false; };
+  * ...
+  * TransportNodeHid.create().then(transport => ...)
+  */
++let transportCache = null;
+ var TransportNodeHid = /** @class */ (function (_super) {
+     __extends(TransportNodeHid, _super);
+     function TransportNodeHid() {
+@@ -75,14 +76,19 @@ var TransportNodeHid = /** @class */ (function (_super) {
+      * if path="" is not provided, the library will take the first device
+      */
+     TransportNodeHid.open = function (path) {
++        if(transportCache !== null) {
++            transportCache.device.close()
++        }
+         return Promise.resolve().then(function () {
+             if (path) {
+-                return new TransportNodeHid(new node_hid_1["default"].HID(path));
+-            }
++                transportCache = new TransportNodeHid(new node_hid_1["default"].HID(path));
++            } else {
+             var device = (0, hw_transport_node_hid_noevents_1.getDevices)()[0];
+             if (!device)
+                 throw new errors_1.TransportError("NoDevice", "NoDevice");
+-            return new TransportNodeHid(new node_hid_1["default"].HID(device.path));
++                transportCache= new TransportNodeHid(new node_hid_1["default"].HID(device.path));
++            }
++            return transportCache;
+         });
+     };
+     /**

@@ -105,6 +105,7 @@ Used to update the royalty config for the base Capsule NFT contract.
 
 ## Mainnet addresses
 - Dollar Store Kids: 0xE4c3c91De9Eb9b92CedeE9ddB1e4d3388318151c
+- Dollar Store Kids V2 : 0x22d8f86350E983de8758eaF66A19558b73F11A00
 - Collection: 0xC67F5E3a5B697AE004Edd8F84925189a81c6DC4b
 
 ## Summary

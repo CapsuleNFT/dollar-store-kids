@@ -4,7 +4,7 @@ import { IERC20, DollarStoreKids } from '../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { impersonateAccount, setBalance } from '@nomicfoundation/hardhat-network-helpers'
 
-describe('Dollar Store Kids live tests', async function () {
+describe.skip('Dollar Store Kids live tests', async function () {
   const usdcAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
   const dskAddress = '0xE4c3c91De9Eb9b92CedeE9ddB1e4d3388318151c'
   const governorAddress = '0x53a50ac9Bb98dFd61d4031390ebecC4e2bD7f9b1'

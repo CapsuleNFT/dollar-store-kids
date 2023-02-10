@@ -2,9 +2,10 @@ import { ethers } from 'hardhat'
 import { expect } from 'chai'
 import { IERC20, DollarStoreKidsV2, ICapsule, ICapsuleMinter } from '../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { setBalance } from '@nomicfoundation/hardhat-network-helpers'
 import { Address } from './utils'
 
-describe('DSK live upgrade test tests', async function () {
+describe('DSK V2 live tests', async function () {
   const usdcAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 
   let dollarStoreKids: DollarStoreKidsV2, capsuleMinter: ICapsuleMinter
@@ -16,12 +17,9 @@ describe('DSK live upgrade test tests', async function () {
     // eslint-disable-next-line @typescript-eslint/no-extra-semi
     ;[alice] = await ethers.getSigners()
     deployer = await ethers.getImpersonatedSigner(Address.DEPLOYER)
-  })
+    await setBalance(deployer.address, ethers.utils.parseEther('10'))
 
-  beforeEach(async function () {
-    // Deploy DSK operator contract
-    const factory = await ethers.getContractFactory('DollarStoreKidsV2', deployer)
-    dollarStoreKids = (await factory.deploy(Address.DSK_COLLECTION)) as DollarStoreKidsV2
+    dollarStoreKids = (await ethers.getContractAt('DollarStoreKidsV2', Address.DSK_V2)) as DollarStoreKidsV2
 
     capsule = (await ethers.getContractAt('ICapsule', Address.DSK_COLLECTION)) as ICapsule
 
@@ -49,7 +47,8 @@ describe('DSK live upgrade test tests', async function () {
   context('Burn DSK', function () {
     it('should burn DSK', async function () {
       const id = 64 // DSK id owned by deployer
-      const usdcBefore = await usdc.balanceOf(alice.address)
+      const usdcBefore = await usdc.balanceOf(deployer.address)
+
       // given deployer DSK balance is 1
       expect(await capsule.balanceOf(deployer.address)).to.eq(1)
       // then verify deployer is owner of DSK

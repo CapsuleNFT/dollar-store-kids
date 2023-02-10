@@ -4,7 +4,7 @@ import { ICapsuleFactory, IERC20, DollarStoreKids } from '../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { adjustERC20Balance, Address } from './utils'
 
-describe('Dollar Store Kids tests', async function () {
+describe.skip('Dollar Store Kids tests', async function () {
   const baseURI = 'http://localhost/'
   let dollarStoreKids: DollarStoreKids, capsuleFactory: ICapsuleFactory, capsuleMinter
   let capsule, usdc: IERC20

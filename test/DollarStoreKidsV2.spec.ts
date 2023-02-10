@@ -4,8 +4,9 @@ import { expect } from 'chai'
 import { ICapsuleFactory, IERC20, DollarStoreKidsV2, ICapsule, ICapsuleMinter } from '../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { adjustERC20Balance, Address } from './utils'
+import { setBalance } from '@nomicfoundation/hardhat-network-helpers'
 
-describe('Dollar Store Kids tests', async function () {
+describe('Dollar Store Kids V2 tests', async function () {
   const baseURI = 'http://localhost/'
   let dollarStoreKids: DollarStoreKidsV2, capsuleFactory: ICapsuleFactory, capsuleMinter: ICapsuleMinter
   let capsule: ICapsule, usdc: IERC20
@@ -54,7 +55,9 @@ describe('Dollar Store Kids tests', async function () {
     const minter = await dollarStoreKids.CAPSULE_MINTER()
     capsuleMinter = (await ethers.getContractAt('ICapsuleMinter', minter)) as ICapsuleMinter
     // Add DSK contract as whitelistedCallers in CapsuleMinter
-    await capsuleMinter.updateWhitelistedCallers(dollarStoreKids.address)
+    const capsuleGovernor = await ethers.getImpersonatedSigner(await capsuleMinter.governor())
+    await setBalance(capsuleGovernor.address, ethers.utils.parseEther('10'))
+    await capsuleMinter.connect(capsuleGovernor).updateWhitelistedCallers(dollarStoreKids.address)
     mintTax = await capsuleMinter.capsuleMintTax()
     maxUsdcAmount = ethers.utils.parseUnits((await dollarStoreKids.MAX_DSK()).toString(), 6)
     usdc = (await ethers.getContractAt('IERC20', Address.USDC)) as IERC20
